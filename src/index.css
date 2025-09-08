@@ -11,11 +11,8 @@
 .logo { height:32px; }
 
 /* Blinking links */
-@keyframes blinkColors {
-  0%   { color: #0a2472; }  /* dark blue */
-  50%  { color: #ffffff; }  /* white */
-  100% { color: #0a2472; }
-}
+
+
 .nav-links a {
   margin-left:20px;
   text-decoration:none;

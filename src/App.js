@@ -17,6 +17,9 @@ export default function App() {
         <div className="nav-links">
           <Link to="/refund">Refund Tracker</Link>
           <Link to="/tickets">Ticket Tracker</Link>
+          <a href="tel:+18004972175" style={{ fontWeight: "bold", color: "#0a2472" }}>
+            Call Support: +1-800-497-2175
+          </a>
         </div>
       </nav>
 
