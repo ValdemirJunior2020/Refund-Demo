@@ -1,0 +1,8 @@
+[build]
+  functions = "netlify/functions"
+  publish = "build"
+
+[[redirects]]
+  from = "/api/gemini-chat"
+  to = "/.netlify/functions/gemini-chat"
+  status = 200
