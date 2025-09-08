@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getTicketById } from "../mockApi";
 import Timeline from "../components/Timeline";
+import jsPDF from "jspdf";
 
 const STATUS_COLORS = {
   Pending: "#d97706",
@@ -29,15 +30,23 @@ export default function TicketDetails() {
     return () => { mounted = false; };
   }, [id]);
 
-  const lastUpdated = useMemo(() => {
-    if (!t?.steps?.length) return null;
-    const last = t.steps[t.steps.length - 1];
-    return new Date(last.ts).toLocaleString();
-  }, [t]);
-
-  const delays = useMemo(() => {
-    return (t?.steps || []).filter(s => s.delayReason);
-  }, [t]);
+  function exportPDF() {
+    if (!t) return;
+    const doc = new jsPDF();
+    doc.text(`Ticket ${t.id}`, 10, 10);
+    doc.text(`Guest: ${t.guest}`, 10, 20);
+    doc.text(`Itinerary: ${t.itinerary}`, 10, 30);
+    doc.text(`Status: ${t.status}`, 10, 40);
+    doc.text("Timeline:", 10, 50);
+    (t.steps || []).forEach((s, i) => {
+      doc.text(
+        `${new Date(s.ts).toLocaleString()} - ${s.event} (${s.actor})`,
+        10,
+        60 + i*10
+      );
+    });
+    doc.save(`ticket_${t.id}.pdf`);
+  }
 
   if (err) return <p className="error">{err}</p>;
   if (!t) return <p>Loading…</p>;
@@ -56,26 +65,19 @@ export default function TicketDetails() {
             {t.status}
           </span>
           <b>Notes</b><span>{t.notes}</span>
-          <b>Last Updated</b><span>{lastUpdated || "—"}</span>
         </div>
       </div>
-
-      {delays.length > 0 && (
-        <div className="card">
-          <h3>Delay Summary</h3>
-          {delays.map((d, i) => (
-            <div key={i} className="delay" style={{marginBottom:8}}>
-              <b>{new Date(d.ts).toLocaleString()}</b> — {d.delayReason}
-              {d.slaImpact ? ` • SLA: ${d.slaImpact}` : ""}
-              {d.notes ? ` • ${d.notes}` : ""}
-            </div>
-          ))}
-        </div>
-      )}
 
       <div className="card">
         <h3>Timeline</h3>
         <Timeline steps={t.steps} />
+      </div>
+
+      <div className="card">
+        <h3>Quick Actions</h3>
+        <button className="btn" onClick={()=>alert("Escalated!")}>Escalate</button>
+        <button className="btn" style={{marginLeft:8}} onClick={()=>alert("Guest emailed!")}>Email Guest</button>
+        <button className="btn" style={{marginLeft:8}} onClick={exportPDF}>Download PDF</button>
       </div>
     </>
   );

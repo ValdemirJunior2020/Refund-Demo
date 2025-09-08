@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
 import { getRefundByItineraryAndEmail, getRefundByItinerary } from "../mockApi";
-import Progress from "../components/Progress";
+import ProgressBar from "../components/ProgressBar";
 import Timeline from "../components/Timeline";
+import Confetti from "react-confetti";
+import jsPDF from "jspdf";
 
 export default function RefundDetails() {
   const { itinerary } = useParams();
@@ -26,65 +28,59 @@ export default function RefundDetails() {
     return () => { mounted = false; };
   }, [itinerary, email]);
 
-  const lastUpdated = useMemo(() => {
-    if (!data?.refund?.steps?.length) return null;
-    const last = data.refund.steps[data.refund.steps.length - 1];
-    return new Date(last.ts).toLocaleString();
-  }, [data]);
-
-  const delays = useMemo(() => {
-    return (data?.refund?.steps || []).filter(s => s.delayReason);
-  }, [data]);
+  function exportPDF() {
+    if (!data) return;
+    const doc = new jsPDF();
+    doc.text(`Refund Details for ${data.guest || "Guest"}`, 10, 10);
+    doc.text(`Itinerary: ${data.itinerary}`, 10, 20);
+    doc.text(`Hotel: ${data.hotelName}`, 10, 30);
+    doc.text(`Status: ${data.refund.status}`, 10, 40);
+    doc.text("Timeline:", 10, 50);
+    (data.refund.steps || []).forEach((s, i) => {
+      doc.text(
+        `${new Date(s.ts).toLocaleString()} - ${s.event} (${s.actor})`,
+        10,
+        60 + i*10
+      );
+    });
+    doc.save(`refund_${data.itinerary}.pdf`);
+  }
 
   if (err) return <p className="error">{err}</p>;
   if (!data) return <p>Loading…</p>;
 
   return (
     <>
+      {data.refund.status === "Paid" && <Confetti />}
+
       <div className="card">
         <Link to="/refund" className="helper">← Back to search</Link>
-        <h2 style={{marginTop:8}}>Refund Details</h2>
+        <h2 style={{marginTop:8}}>Hi {data.email}, here’s your refund</h2>
         <div className="kv">
           <b>Itinerary</b><span className="badge">{data.itinerary}</span>
-          <b>Email</b><span>{data.email}</span>
           <b>Hotel</b><span>{data.hotelName}</span>
           <b>Dates</b><span>{data.checkIn} → {data.checkOut}</span>
-          <b>Booking Status</b><span>{data.bookingStatus}</span>
-          <b>Last Updated</b><span>{lastUpdated || "—"}</span>
+          <b>Status</b><span>{data.bookingStatus}</span>
         </div>
       </div>
 
       <div className="card">
-        <h3>Refund</h3>
-        {!data.refund ? (
-          <p>No refund on file.</p>
-        ) : (
-          <>
-            <div className="kv" style={{marginBottom:12}}>
-              <b>Amount</b><span>${Number(data.refund.amount).toFixed(2)}</span>
-              <b>Method</b><span>{data.refund.method}</span>
-              <b>ETA</b><span>{data.refund.eta || "—"}</span>
-              <b>Status</b><span>{data.refund.status}</span>
-            </div>
-            <Progress current={data.refund.status} />
+        <h3>Refund Progress</h3>
+        <ProgressBar current={data.refund.status} />
 
-            {delays.length > 0 && (
-              <>
-                <h4 style={{marginTop:16}}>Delay Summary</h4>
-                {delays.map((d, i) => (
-                  <div key={i} className="delay" style={{marginBottom:8}}>
-                    <b>{new Date(d.ts).toLocaleString()}</b> — {d.delayReason}
-                    {d.slaImpact ? ` • SLA: ${d.slaImpact}` : ""}
-                    {d.notes ? ` • ${d.notes}` : ""}
-                  </div>
-                ))}
-              </>
-            )}
+        <div className="kv" style={{marginBottom:12}}>
+          <b>Amount</b><span>${Number(data.refund.amount).toFixed(2)}</span>
+          <b>Method</b><span>{data.refund.method}</span>
+          <b>ETA</b><span>{data.refund.eta || "—"}</span>
+          <b>Status</b><span>{data.refund.status}</span>
+        </div>
 
-            <h4 style={{marginTop:16}}>Timeline</h4>
-            <Timeline steps={data.refund.steps} />
-          </>
-        )}
+        <button className="btn" onClick={exportPDF}>Download PDF</button>
+      </div>
+
+      <div className="card">
+        <h3>Timeline</h3>
+        <Timeline steps={data.refund.steps} />
       </div>
     </>
   );

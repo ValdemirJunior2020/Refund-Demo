@@ -4,7 +4,7 @@ export default function Timeline({ steps = [] }) {
   return (
     <ul style={{marginTop:8}}>
       {steps.map((s, i) => (
-        <li key={`${s.ts}-${i}`} style={{marginBottom:8}}>
+        <li key={`${s.ts}-${i}`} style={{marginBottom:12}}>
           <div><b>{new Date(s.ts).toLocaleString()}</b> — {s.event}</div>
           <div className="helper">
             <span className="badge">Actor: {s.actor}</span>

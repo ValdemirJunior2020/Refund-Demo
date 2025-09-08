@@ -26,14 +26,14 @@ export const MOCK_BOOKINGS = [
           event: "Refund request submitted to supplier",
           actor: "Agent Farida T.",
           channel: "Internal Tool",
-          notes: "FOC requested due to duplicate.",
+          notes: "FOC requested due to duplicate."
         },
         {
           ts: "2025-08-28T15:01:00Z",
           event: "Supplier approved refund",
           actor: "Hotel/Supplier",
           channel: "Portal",
-          notes: "Approved same day.",
+          notes: "Approved same day."
         },
         {
           ts: "2025-08-29T10:22:00Z",
@@ -56,7 +56,7 @@ export const MOCK_BOOKINGS = [
           event: "Processed",
           actor: "Processor",
           channel: "Payment API",
-          notes: "Funds released to card.",
+          notes: "Funds released to card."
         }
       ]
     }
@@ -79,7 +79,7 @@ export const MOCK_BOOKINGS = [
           event: "Guest requested refund",
           actor: "Guest",
           channel: "Email",
-          notes: "Charged after cancellation cutoff.",
+          notes: "Charged after cancellation cutoff."
         },
         {
           ts: "2025-09-02T09:18:00Z",
@@ -96,6 +96,56 @@ export const MOCK_BOOKINGS = [
           notes: "Manager out; promised reply next day.",
           delayReason: "Manager unavailable",
           slaImpact: "At risk"
+        }
+      ]
+    }
+  },
+  // PAID example to trigger confetti
+  {
+    itinerary: "P4455667",
+    email: "paid@example.com",
+    hotelName: "Courtyard Orlando Lake Nona",
+    checkIn: "2025-08-10",
+    checkOut: "2025-08-12",
+    bookingStatus: "Cancelled",
+    refund: {
+      amount: 189.99,
+      method: "Original card",
+      status: "Paid",
+      eta: "Paid on 2025-09-02",
+      steps: [
+        {
+          ts: "2025-08-29T09:00:00Z",
+          event: "Guest requested refund",
+          actor: "Guest",
+          channel: "Email",
+          notes: "Flight canceled"
+        },
+        {
+          ts: "2025-08-29T09:12:00Z",
+          event: "Agent submitted to supplier",
+          actor: "Agent Mia P.",
+          channel: "Internal Tool"
+        },
+        {
+          ts: "2025-08-29T12:20:00Z",
+          event: "Supplier approved refund",
+          actor: "Hotel/Supplier",
+          channel: "Portal"
+        },
+        {
+          ts: "2025-09-02T10:05:00Z",
+          event: "Processed",
+          actor: "Processor",
+          channel: "Payment API",
+          notes: "Batch 10:00 ET"
+        },
+        {
+          ts: "2025-09-02T15:30:00Z",
+          event: "Paid",
+          actor: "Bank",
+          channel: "Webhook",
+          notes: "Funds posted to card"
         }
       ]
     }
