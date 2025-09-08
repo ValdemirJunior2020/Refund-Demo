@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
 import RefundSearch from "./pages/RefundSearch";
 import RefundDetails from "./pages/RefundDetails";
 import TicketSearch from "./pages/TicketSearch";
@@ -7,6 +8,8 @@ import ChatWidget from "./components/ChatWidget";
 import "./index.css";
 
 export default function App() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <BrowserRouter>
       <nav className="navbar">
@@ -14,10 +17,21 @@ export default function App() {
           <img src="/logo.svg" alt="Logo" className="logo" />
           <h1>Support Dashboard</h1>
         </div>
-        <div className="nav-links">
-          <Link to="/refund">Refund Tracker</Link>
-          <Link to="/tickets">Ticket Tracker</Link>
-          <a href="tel:+18004972175" style={{ fontWeight: "bold", color: "#0a2472" }}>
+
+        {/* Hamburger (mobile) */}
+        <button
+          className="hamburger"
+          onClick={() => setMenuOpen(o => !o)}
+          aria-label="Toggle menu"
+        >
+          {menuOpen ? "✖" : "☰"}
+        </button>
+
+        {/* Links (desktop + mobile) */}
+        <div className={`nav-links ${menuOpen ? "open" : ""}`}>
+          <Link to="/refund" onClick={() => setMenuOpen(false)}>Refund Tracker</Link>
+          <Link to="/tickets" onClick={() => setMenuOpen(false)}>Ticket Tracker</Link>
+          <a href="tel:+18004972175" onClick={() => setMenuOpen(false)}>
             Call Support: +1-800-497-2175
           </a>
         </div>
@@ -33,7 +47,6 @@ export default function App() {
         </Routes>
       </div>
 
-      {/* Floating chatbot on all pages */}
       <ChatWidget />
     </BrowserRouter>
   );

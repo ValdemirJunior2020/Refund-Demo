@@ -1,26 +1,32 @@
-/* Navbar look */
+/* Navbar look (pastel light blue + dark blue text) */
 .navbar {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  background:#a7c7e7; /* pastel blue */
-  padding:12px 20px;
-  color:#fff;
+  position: sticky; top: 0; z-index: 1000; /* stays visible */
+  display: flex; justify-content: space-between; align-items: center;
+  background: #dbeafe; /* pastel light blue */
+  padding: 12px 20px;
+  color: #0a2472;      /* dark blue text */
 }
-.nav-left { display:flex; align-items:center; gap:12px; }
-.logo { height:32px; }
+.nav-left { display: flex; align-items: center; gap: 12px; }
+.logo { height: 32px; }
 
-/* Blinking links */
-
-
+.nav-links { display: flex; align-items: center; gap: 20px; }
 .nav-links a {
-  margin-left:20px;
-  text-decoration:none;
-  font-weight:600;
-  animation: blinkColors 1.5s infinite;
+  margin-left: 0;
+  text-decoration: none;
+  font-weight: 700;
+  color: #0a2472;                 /* dark blue links */
+}
+.nav-links a:hover { text-decoration: underline; }
+
+/* Hamburger (hidden on desktop) */
+.hamburger {
+  display: none;
+  background: none; border: none;
+  font-size: 28px; cursor: pointer;
+  color: #0a2472;
 }
 
-/* General UI */
+/* General UI (kept from your styles) */
 .container { max-width: 900px; margin: 0 auto; padding: 24px; }
 .card { background:#fff; border:1px solid #e9e9e9; border-radius:12px; padding:16px; margin-bottom:16px; }
 .input { width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:10px; }
@@ -33,12 +39,34 @@
 .step.active { background:#000; color:#fff; }
 .error { color:#c00; font-weight:600; }
 .helper { color:#666; font-size:14px; }
-.badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #ddd; }
-
 .badge { font-size:12px; padding:2px 8px; border-radius:999px; border:1px solid #ddd; background:#fff; }
-.helper { color:#666; font-size:14px; }
 .delay { margin-top:4px; padding:6px 10px; border-left:4px solid #ef4444; background:#fff5f5; border-radius:6px; font-size:14px; }
 
+/* Mobile responsive menu */
+@media (max-width: 768px) {
+  .hamburger { display: block; }
 
-.delay { margin-top:4px; padding:6px 10px; border-left:4px solid #ef4444; background:#fff5f5; border-radius:6px; font-size:14px; }
+  /* hide links until menu is opened */
+  .nav-links {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    right: 16px;
+    top: 64px;                  /* sits under navbar */
+    background: #dbeafe;        /* same pastel blue */
+    border: 1px solid #bfdcff;  /* subtle border */
+    border-radius: 10px;
+    padding: 12px;
+    width: 85%;
+    max-width: 320px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    animation: slideDown .22s ease-out;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { padding: 10px 6px; }
 
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
