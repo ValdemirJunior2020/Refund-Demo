@@ -1,8 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const BOT = "bot";
 const USER = "you";
+
+// If you use `npm start` and want to hit your deployed function,
+// set REACT_APP_API_BASE=https://YOUR-SITE.netlify.app in .env.development
+const API_BASE = process.env.REACT_APP_API_BASE || "";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
@@ -14,25 +18,82 @@ export default function ChatWidget() {
   const [transcript, setTranscript] = useState([
     { role: "model", content: "Hi! I can help with refunds or tickets." }
   ]);
+
   const navigate = useNavigate();
+  const location = useLocation();
   const endRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, typing]);
 
-  // Call Gemini backend
+  // --- Call Gemini via Netlify function ---
   async function askGemini(history) {
-    const res = await fetch("/api/gemini-chat", {
+    const res = await fetch(`${API_BASE}/api/gemini-chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ messages: history })
     });
-    if (!res.ok) throw new Error("Gemini error");
-    const data = await res.json();
+
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = { error: text || "Non-JSON response" }; }
+
+    if (!res.ok) {
+      const msg = data?.error || `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
     return data.reply;
   }
 
+  // --- Local quick intents (navigate to refund/ticket pages) ---
+  async function tryLocalIntents(text) {
+    const lower = text.toLowerCase();
+
+    // "track refund <itinerary> <email?>"
+    const refundMatch = lower.match(/track refund\s+([a-z0-9]+)\s*([^\s]+@[^\s]+)?/i);
+    if (refundMatch) {
+      const itinerary = refundMatch[1];
+      const email = (refundMatch[2] || "").trim();
+      setMsgs(m => [...m, { from: BOT, text: `Opening refund for ${itinerary}${email ? " ("+email+")" : ""}…` }]);
+      if (email) navigate(`/refund/${encodeURIComponent(itinerary)}?email=${encodeURIComponent(email)}`);
+      else navigate(`/refund/${encodeURIComponent(itinerary)}`);
+      return true;
+    }
+
+    // "open ticket <id>"
+    const ticketMatch = lower.match(/open ticket\s+([0-9]+)/i);
+    if (ticketMatch) {
+      const id = ticketMatch[1];
+      setMsgs(m => [...m, { from: BOT, text: `Opening ticket #${id}…` }]);
+      navigate(`/tickets/${encodeURIComponent(id)}`);
+      return true;
+    }
+
+    // explainers
+    if (lower.includes("why delayed")) {
+      setMsgs(m => [...m, { from: BOT, text: "Delays often come from hotel approvals or bank queues. If status is 'Processed', funds may take 1–10 business days to post." }]);
+      return true;
+    }
+    if (lower.includes("agent")) {
+      setMsgs(m => [...m, { from: BOT, text: "Ok, I can escalate. You can open a ticket or provide your itinerary here." }]);
+      return true;
+    }
+
+    // contextual nudges
+    if (location.pathname.startsWith("/refund")) {
+      setMsgs(m => [...m, { from: BOT, text: "On the Refund page you’ll see status, ETA, and a timeline. You can also type: 'track refund <itinerary> <email>'." }]);
+      return true;
+    }
+    if (location.pathname.startsWith("/tickets")) {
+      setMsgs(m => [...m, { from: BOT, text: "On the Ticket page you can search by Ticket ID. Try: 'open ticket <id>'." }]);
+      return true;
+    }
+
+    return false; // not handled locally
+  }
+
+  // --- Send handler ---
   const onSend = async (e) => {
     e?.preventDefault();
     if (!input.trim()) return;
@@ -42,15 +103,15 @@ export default function ChatWidget() {
     setTranscript(t => [...t, { role: "user", content: userText }]);
     setInput("");
 
+    if (await tryLocalIntents(userText)) return;
+
     try {
       setTyping(true);
-      const reply = await askGemini(
-        transcript.concat({ role: "user", content: userText })
-      );
+      const reply = await askGemini(transcript.concat({ role: "user", content: userText }));
       setMsgs(m => [...m, { from: BOT, text: reply }]);
       setTranscript(t => [...t, { role: "model", content: reply }]);
-    } catch {
-      setMsgs(m => [...m, { from: BOT, text: "Sorry, I couldn’t reach Gemini. Try again later." }]);
+    } catch (e2) {
+      setMsgs(m => [...m, { from: BOT, text: `Gemini error: ${e2.message}` }]);
     } finally {
       setTyping(false);
     }
@@ -80,7 +141,7 @@ export default function ChatWidget() {
             {msgs.map((m, i) => (
               <Bubble key={i} from={m.from} text={m.text} />
             ))}
-            {typing && <div className="helper">Gemini is typing…</div>}
+            {typing && <div className="helper">Agent is typing…</div>}
             <div ref={endRef} />
           </div>
           <form onSubmit={onSend} style={inputRowStyle}>
@@ -111,7 +172,7 @@ function Bubble({ from, text }) {
         color: mine ? "#fff" : "#0f172a",
         border: mine ? "0" : "1px solid #e2e8f0"
       }}>
-        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{mine ? "You" : "Gemini"}</div>
+        <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 4 }}>{mine ? "You" : "Support"}</div>
         {text}
       </div>
     </div>
@@ -141,4 +202,9 @@ const headerStyle = {
 const closeBtnStyle = { background: "transparent", border: "none", fontSize: 22, cursor: "pointer", color: "#0a2472" };
 const bodyStyle = { padding: "12px", overflowY: "auto", flex: 1, background: "#fafafa" };
 const inputRowStyle = { display: "flex", gap: 8, padding: 12, borderTop: "1px solid #e5e7eb", background: "#fff" };
-const inputStyle = { flex: 1, padding: "10px 12px", border: "1px solid #cbd5e1", borderRadius: 10 };
+const inputStyle = {
+  flex: 1,
+  padding: "10px 12px",
+  border: "1px solid #cbd5e1",   // ✅ fixed string
+  borderRadius: 10
+};

@@ -3,7 +3,7 @@ import RefundSearch from "./pages/RefundSearch";
 import RefundDetails from "./pages/RefundDetails";
 import TicketSearch from "./pages/TicketSearch";
 import TicketDetails from "./pages/TicketDetails";
-import ChatWidget from "./components/ChatWidget";   // 👈 add this import
+import ChatWidget from "./components/ChatWidget";
 import "./index.css";
 
 export default function App() {
@@ -30,7 +30,7 @@ export default function App() {
         </Routes>
       </div>
 
-      {/* 👇 floating chatbot appears bottom-right across all routes */}
+      {/* Floating chatbot on all pages */}
       <ChatWidget />
     </BrowserRouter>
   );

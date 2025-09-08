@@ -2,6 +2,9 @@
   functions = "netlify/functions"
   publish = "build"
 
+[build.environment]
+  NODE_VERSION = "20"
+
 [[redirects]]
   from = "/api/gemini-chat"
   to = "/.netlify/functions/gemini-chat"
