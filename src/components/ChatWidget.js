@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";  // ✅ added import
 
 const BOT = "bot";
 const USER = "you";
@@ -19,8 +19,8 @@ export default function ChatWidget() {
     { role: "model", content: "Hi! I can help with refunds or tickets." }
   ]);
 
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate();   // ✅ now imported
+  const location = useLocation();   // ✅ now imported
   const endRef = useRef(null);
 
   useEffect(() => {
@@ -134,7 +134,7 @@ export default function ChatWidget() {
       {open && (
         <div style={panelStyle}>
           <div style={headerStyle}>
-            <span>Live Help (Gemini 2.5)</span>
+            <span>Live Help (Hotel Reservation)</span>
             <button onClick={() => setOpen(false)} style={closeBtnStyle}>×</button>
           </div>
           <div style={bodyStyle}>
@@ -205,6 +205,6 @@ const inputRowStyle = { display: "flex", gap: 8, padding: 12, borderTop: "1px so
 const inputStyle = {
   flex: 1,
   padding: "10px 12px",
-  border: "1px solid #cbd5e1",   // ✅ fixed string
+  border: "1px solid #cbd5e1",
   borderRadius: 10
 };
