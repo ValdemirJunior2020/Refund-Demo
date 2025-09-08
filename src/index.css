@@ -1,13 +1,23 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+:root { --bg:#fafafa; --card:#fff; --ink:#111; --muted:#666; --border:#e9e9e9; }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+* { box-sizing: border-box; }
+body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; background: var(--bg); color: var(--ink); }
+.container { max-width: 900px; margin: 0 auto; padding: 24px; }
+.header { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom: 12px; }
+.badge { font-size:12px; padding:4px 8px; border:1px solid var(--border); border-radius: 999px; background: #fff; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+.row { display:grid; gap:12px; }
+.input { width:100%; padding:11px 12px; border:1px solid #ccc; border-radius:10px; }
+.btn { background:#000; color:#fff; padding:11px 14px; border:0; border-radius:10px; cursor:pointer; font-weight:600; }
+.btn:disabled { opacity:.6; cursor:not-allowed; }
+.helper { color: var(--muted); font-size: 14px; }
+.error { color:#c00; font-weight:600; }
+.kv { display:grid; grid-template-columns: 160px 1fr; gap:8px 12px; }
+.kv b { color:#333; }
+.progress { display:flex; gap:8px; flex-wrap:wrap; }
+.step { padding:6px 10px; border-radius:8px; background:#eee; font-weight:600; }
+.step.active { background:#000; color:#fff; }
+.pill { display:inline-block; padding:4px 8px; border-radius:999px; background:#f3f3f3; font-size:12px; }
+.footer-note { color: var(--muted); font-size: 12px; }
+hr.sep { border:0; border-top:1px dashed var(--border); margin: 12px 0; }
+.copy { font-size:12px; border:1px solid var(--border); background:#fff; padding:6px 8px; border-radius:8px; cursor:pointer; }
